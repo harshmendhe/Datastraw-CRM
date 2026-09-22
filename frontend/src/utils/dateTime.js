@@ -27,7 +27,7 @@ export function parseTimestamp(val) {
     : str;
 
   // If no timezone suffix is present, treat as UTC (backend stores UTC-naive values)
-  if (!/[Zz]$/.test(normalized) && !/[+\-]\d{2}:\d{2}$/.test(normalized)) {
+  if (!/[Zz]$/.test(normalized) && !/[+-]\d{2}:\d{2}$/.test(normalized)) {
     normalized += "Z";
   }
 

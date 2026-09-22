@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search, Plus, ExternalLink, Inbox, Clock, Mail } from 'lucide-react';
 import { formatDate, formatTime } from '../utils/dateTime';
+import { getStatusClass, getPriorityClass } from '../utils/statusBadges';
 
 export default function TicketsView({
   tickets,
@@ -12,33 +13,6 @@ export default function TicketsView({
   onSelectTicket,
   onSelectCustomer,
 }) {
-  const getStatusClass = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'open':
-        return 'status-open';
-      case 'in progress':
-        return 'status-in-progress';
-      case 'closed':
-        return 'status-closed';
-      default:
-        return 'status-open';
-    }
-  };
-
-  const getPriorityClass = (priority) => {
-    switch (priority?.toLowerCase()) {
-      case 'urgent':
-        return 'priority-urgent';
-      case 'high':
-        return 'priority-high';
-      case 'medium':
-        return 'priority-medium';
-      case 'low':
-        return 'priority-low';
-      default:
-        return 'priority-medium';
-    }
-  };
 
 
   return (

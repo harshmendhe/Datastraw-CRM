@@ -7,7 +7,7 @@ A modern, high-performance Customer Support Ticket CRM built for support teams t
 ## 🛠️ Tech Stack
 
 - **Backend**: Python 3.12, FastAPI, SQLAlchemy ORM, Pydantic, Uvicorn
-- **Database**: SQLite (embedded, auto-created tables and demo seed data on startup)
+- **Database**: SQLite (embedded, auto-created tables; demo seed data gated behind SEED_DEMO_DATA=true for local testing)
 - **Frontend**: React 19, Vite, Lucide Icons, Pure CSS Design System
 - **Deployment Ready**: Procfile, environment-aware API URL, Railway & Cloud ready
 
@@ -26,23 +26,31 @@ Datastraw CRM/
 │   │   ├── schemas.py           # Pydantic schemas (TicketCreate, TicketUpdate, etc.)
 │   │   ├── crud.py              # Sequential ticket ID generation (TKT-001, TKT-002, etc.), search, filter, notes logic
 │   │   └── main.py              # FastAPI endpoints & CORS
+│   ├── .env.example             # Backend environment template
 │   ├── Procfile                 # Railway / production deployment process
 │   ├── requirements.txt         # Backend Python dependencies
 │   ├── test_api.py              # Automated end-to-end API test suite
+│   ├── test_timestamp_handling.py # UTC/Asia:Kolkata timestamp tests
 │   └── .gitignore
 │
 ├── frontend/
+│   ├── public/
+│   │   └── favicon.svg          # Application favicon
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Navbar.jsx            # Support CRM branding & quick ticket action
+│   │   │   ├── Navbar.jsx            # Support CRM branding & header
 │   │   │   ├── StatsSummary.jsx      # KPI summary (Total, Open, In Progress, Closed, Urgent)
 │   │   │   ├── TicketsView.jsx       # Real-time search, status filter & tickets table
 │   │   │   ├── CreateTicketModal.jsx # New ticket submission modal
-│   │   │   └── TicketDetailModal.jsx # Ticket detail view, status/priority edit, discussion notes
+│   │   │   ├── TicketDetailModal.jsx # Ticket detail view, status/priority edit, discussion notes
+│   │   │   └── CustomerHistoryModal.jsx # Customer historical tickets modal
+│   │   ├── utils/
+│   │   │   ├── dateTime.js           # Shared UTC to Asia/Kolkata date/time formatting
+│   │   │   └── statusBadges.js       # Shared status & priority badge CSS helpers
 │   │   ├── api.js               # API client with VITE_API_BASE_URL support
 │   │   ├── App.jsx              # Main application orchestration & state
-│   │   ├── index.css            # Dark slate support desk design system
-│   │   └── main.jsx
+│   │   ├── index.css            # Support desk design system
+│   │   └── main.jsx             # React entry point
 │   ├── .env.example             # Production API URL template
 │   ├── package.json
 │   ├── vite.config.js
@@ -83,7 +91,7 @@ uvicorn app.main:app --reload --port 8000
 - **Interactive Swagger Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - **ReDoc**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 
-*Note: On first startup, the database automatically initializes `crm.db` and populates realistic customer tickets and initial notes.*
+*Note: On startup, the database automatically initializes tables in `crm.db`. Demo seed data is never seeded in production and requires `SEED_DEMO_DATA=true` in local development.*
 
 ### 2. Run Automated API Verification
 

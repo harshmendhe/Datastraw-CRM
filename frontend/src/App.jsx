@@ -28,7 +28,6 @@ export default function App() {
   const [tickets, setTickets] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [loading, setLoading] = useState(false);
   const [backendError, setBackendError] = useState(null);
 
   // Modals state
@@ -52,17 +51,14 @@ export default function App() {
   }, []);
 
   const loadTickets = useCallback(async () => {
-    setLoading(true);
     setBackendError(null);
     try {
       const data = await fetchTickets(search, statusFilter);
       setTickets(data);
-    } catch (err) {
+    } catch {
       setBackendError(
         'Unable to connect to the FastAPI Support backend. Please verify the backend is running.'
       );
-    } finally {
-      setLoading(false);
     }
   }, [search, statusFilter]);
 
