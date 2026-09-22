@@ -1,7 +1,10 @@
+import os
 from contextlib import asynccontextmanager
 from typing import List, Optional
 from fastapi import FastAPI, Depends, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 from sqlalchemy.orm import Session
 
 from .database import engine, Base, get_db
@@ -30,17 +33,61 @@ async def lifespan(app: FastAPI):
         seed_initial_tickets(db)
     yield
 
+# Environment configuration
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development").strip().lower()
+IS_PRODUCTION = ENVIRONMENT in ("production", "prod")
+
 app = FastAPI(
     title="Datastraw Support Ticket CRM API",
     description="Backend API for Datastraw Support Ticket CRM",
     version="1.0.0",
     lifespan=lifespan,
+    docs_url=None if IS_PRODUCTION else "/docs",
+    redoc_url=None if IS_PRODUCTION else "/redoc",
+    openapi_url=None if IS_PRODUCTION else "/openapi.json",
 )
 
+# Security Headers Middleware
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response: Response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "img-src 'self' data: https:; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "connect-src 'self' *; "
+            "frame-ancestors 'none';"
+        )
+        if IS_PRODUCTION:
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
+
 # Configure CORS
+FRONTEND_URL_ENV = os.getenv("FRONTEND_URL") or os.getenv("ALLOWED_ORIGINS")
+if FRONTEND_URL_ENV:
+    allowed_origins = [orig.strip() for orig in FRONTEND_URL_ENV.split(",") if orig.strip()]
+elif IS_PRODUCTION:
+    allowed_origins = []
+else:
+    allowed_origins = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:4173",
+        "http://127.0.0.1:4173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
+    allow_origin_regex=None if IS_PRODUCTION else r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,12 +96,14 @@ app.add_middleware(
 
 @app.get("/", tags=["Health"])
 def root():
-    return {
+    data = {
         "status": "online",
         "app": "Datastraw Support Ticket CRM API",
         "version": "1.0.0",
-        "docs": "/docs"
     }
+    if not IS_PRODUCTION:
+        data["docs"] = "/docs"
+    return data
 
 
 # --- Stats / KPI Endpoint ---

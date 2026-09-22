@@ -44,6 +44,11 @@ yarn-error.log*
 pnpm-debug.log*
 .eslintcache
 
+# Environment files
+.env
+.env.local
+.env.*.local
+
 # IDEs & System
 .vscode/
 .idea/

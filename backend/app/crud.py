@@ -2,17 +2,24 @@
 CRUD operations for Support Ticket CRM.
 Sequential ticket ID generation (TKT-001, TKT-002, etc.), search, filter, and notes logic.
 """
+import threading
+import time
 from datetime import datetime
 from typing import Optional, List
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, func
+from sqlalchemy.exc import IntegrityError, OperationalError
 from .models import Ticket, Note
 from .schemas import TicketCreate, TicketUpdate
+
+_ticket_creation_lock = threading.Lock()
 
 def generate_ticket_id(db: Session) -> str:
     """Sequential ticket ID generation (TKT-001, TKT-002, etc.)."""
     last_ticket = db.query(Ticket).order_by(Ticket.id.desc()).first()
     next_num = (last_ticket.id + 1) if last_ticket else 1
+    while db.query(Ticket).filter(Ticket.ticket_id == f"TKT-{next_num:03d}").first() is not None:
+        next_num += 1
     return f"TKT-{next_num:03d}"
 
 def get_tickets(
@@ -60,23 +67,32 @@ def get_tickets_by_customer_email(db: Session, customer_email: str) -> List[Tick
     )
 
 def create_ticket(db: Session, ticket_data: TicketCreate) -> Ticket:
-    tkt_id = generate_ticket_id(db)
-    new_ticket = Ticket(
-        ticket_id=tkt_id,
-        customer_name=ticket_data.customer_name.strip(),
-        customer_email=ticket_data.customer_email.strip(),
-        subject=ticket_data.subject.strip(),
-        description=ticket_data.description.strip(),
-        priority=ticket_data.priority or "Medium",
-        assigned_to=ticket_data.assigned_to,
-        status="Open",
-        created_at=datetime.now(),
-        updated_at=None,
-    )
-    db.add(new_ticket)
-    db.commit()
-    db.refresh(new_ticket)
-    return new_ticket
+    max_retries = 10
+    for attempt in range(max_retries):
+        with _ticket_creation_lock:
+            try:
+                tkt_id = generate_ticket_id(db)
+                new_ticket = Ticket(
+                    ticket_id=tkt_id,
+                    customer_name=ticket_data.customer_name.strip(),
+                    customer_email=ticket_data.customer_email.strip(),
+                    subject=ticket_data.subject.strip(),
+                    description=ticket_data.description.strip(),
+                    priority=ticket_data.priority or "Medium",
+                    assigned_to=ticket_data.assigned_to,
+                    status="Open",
+                    created_at=datetime.now(),
+                    updated_at=None,
+                )
+                db.add(new_ticket)
+                db.commit()
+                db.refresh(new_ticket)
+                return new_ticket
+            except (IntegrityError, OperationalError):
+                db.rollback()
+                if attempt == max_retries - 1:
+                    raise
+        time.sleep(0.05 * (attempt + 1))
 
 def update_ticket(db: Session, ticket_id: str, update_data: TicketUpdate) -> Optional[Ticket]:
     ticket = get_ticket_by_ticket_id(db, ticket_id)

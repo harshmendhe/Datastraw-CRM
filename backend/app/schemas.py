@@ -1,6 +1,6 @@
 from datetime import datetime
-from typing import Optional, List
-from pydantic import BaseModel, EmailStr
+from typing import Literal, Optional, List
+from pydantic import BaseModel, EmailStr, Field
 
 # --- Note Schemas ---
 class NoteResponse(BaseModel):
@@ -16,14 +16,14 @@ class NoteResponse(BaseModel):
 # --- Ticket Schemas ---
 class TicketCreate(BaseModel):
     customer_name: str
-    customer_email: str
-    subject: str
-    description: str
+    customer_email: EmailStr
+    subject: str = Field(..., max_length=200)
+    description: str = Field(..., max_length=5000)
     priority: Optional[str] = "Medium"
     assigned_to: Optional[str] = None
 
 class TicketUpdate(BaseModel):
-    status: Optional[str] = None
+    status: Optional[Literal["Open", "In Progress", "Closed"]] = None
     priority: Optional[str] = None
     assigned_to: Optional[str] = None
     notes: Optional[str] = None  # Text for internal note to append during update
