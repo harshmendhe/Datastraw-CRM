@@ -24,7 +24,6 @@ from .crud import (
     seed_initial_tickets,
 )
 
-# Initialize tables
 Base.metadata.create_all(bind=engine)
 
 @asynccontextmanager
@@ -33,7 +32,6 @@ async def lifespan(app: FastAPI):
         seed_initial_tickets(db)
     yield
 
-# Environment configuration
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development").strip().lower()
 IS_PRODUCTION = ENVIRONMENT in ("production", "prod")
 

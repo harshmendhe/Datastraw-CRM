@@ -15,7 +15,6 @@ import {
 } from './api';
 
 export default function App() {
-  // Stats
   const [stats, setStats] = useState({
     total_tickets: 0,
     open_tickets: 0,
@@ -24,18 +23,15 @@ export default function App() {
     urgent_tickets: 0,
   });
 
-  // Ticket list state
   const [tickets, setTickets] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [backendError, setBackendError] = useState(null);
 
-  // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedTicketDetail, setSelectedTicketDetail] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  // Customer History Modal state
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customerTickets, setCustomerTickets] = useState([]);
   const [isCustomerHistoryOpen, setIsCustomerHistoryOpen] = useState(false);

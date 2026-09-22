@@ -37,7 +37,6 @@ def get_tickets(
         query = query.filter(func.lower(Ticket.customer_email) == customer_email.strip().lower())
 
     if status and status.strip().lower() != "all":
-        # Case-insensitive comparison for status
         query = query.filter(func.lower(Ticket.status) == status.strip().lower())
 
     if search and search.strip():
