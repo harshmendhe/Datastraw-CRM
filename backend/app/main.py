@@ -69,20 +69,23 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 app.add_middleware(SecurityHeadersMiddleware)
 
 # Configure CORS
+dev_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:4173",
+    "http://127.0.0.1:4173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+allowed_origins = [] if IS_PRODUCTION else list(dev_origins)
+
 FRONTEND_URL_ENV = os.getenv("FRONTEND_URL") or os.getenv("ALLOWED_ORIGINS")
 if FRONTEND_URL_ENV:
-    allowed_origins = [orig.strip() for orig in FRONTEND_URL_ENV.split(",") if orig.strip()]
-elif IS_PRODUCTION:
-    allowed_origins = []
-else:
-    allowed_origins = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:4173",
-        "http://127.0.0.1:4173",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ]
+    for orig in FRONTEND_URL_ENV.split(","):
+        cleaned = orig.strip().rstrip("/")
+        if cleaned and cleaned not in allowed_origins:
+            allowed_origins.append(cleaned)
 
 app.add_middleware(
     CORSMiddleware,

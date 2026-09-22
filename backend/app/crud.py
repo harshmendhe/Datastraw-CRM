@@ -2,9 +2,10 @@
 CRUD operations for Support Ticket CRM.
 Sequential ticket ID generation (TKT-001, TKT-002, etc.), search, filter, and notes logic.
 """
+import os
 import threading
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, func
@@ -81,7 +82,7 @@ def create_ticket(db: Session, ticket_data: TicketCreate) -> Ticket:
                     priority=ticket_data.priority or "Medium",
                     assigned_to=ticket_data.assigned_to,
                     status="Open",
-                    created_at=datetime.now(),
+                    created_at=datetime.now(timezone.utc),
                     updated_at=None,
                 )
                 db.add(new_ticket)
@@ -116,7 +117,7 @@ def update_ticket(db: Session, ticket_id: str, update_data: TicketUpdate) -> Opt
         )
         db.add(note_entry)
 
-    ticket.updated_at = datetime.now()
+    ticket.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(ticket)
     return ticket
@@ -139,8 +140,20 @@ def get_stats(db: Session) -> dict:
         "urgent_tickets": urgent_count,
     }
 
-def seed_initial_tickets(db: Session):
-    """Seed realistic support tickets on first launch if empty."""
+def seed_initial_tickets(db: Session, force: bool = False):
+    """Seed realistic support tickets on first launch if explicitly enabled."""
+    env = os.getenv("ENVIRONMENT", "development").strip().lower()
+    is_prod = env in ("production", "prod")
+
+    # Never auto-seed in production
+    if is_prod and not force:
+        return
+
+    # Seed only when SEED_DEMO_DATA=true (default=false)
+    seed_flag = os.getenv("SEED_DEMO_DATA", "false").strip().lower()
+    if not force and seed_flag not in ("true", "1", "yes"):
+        return
+
     if db.query(Ticket).count() > 0:
         return
 

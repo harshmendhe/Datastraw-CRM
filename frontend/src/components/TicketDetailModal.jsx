@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Mail, Clock, MessageSquare, Plus, Check } from 'lucide-react';
+import { formatDateTime } from '../utils/dateTime';
 
 export default function TicketDetailModal({ isOpen, onClose, ticket, onUpdate }) {
   const [status, setStatus] = useState('Open');
@@ -41,27 +42,6 @@ export default function TicketDetailModal({ isOpen, onClose, ticket, onUpdate })
     }
   };
 
-  const safeParseDate = (val) => {
-    if (!val) return null;
-    if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
-    const str = String(val).trim();
-    if (!str) return null;
-    const normalized = str.includes(' ') && !str.includes('T') ? str.replace(' ', 'T') : str;
-    const d = new Date(normalized);
-    return isNaN(d.getTime()) ? null : d;
-  };
-
-  const formatDate = (isoString) => {
-    const d = safeParseDate(isoString);
-    if (!d) return '';
-    return d.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -120,11 +100,11 @@ export default function TicketDetailModal({ isOpen, onClose, ticket, onUpdate })
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Clock size={13} color="var(--text-muted)" />
-                  <span><strong>Created:</strong> {formatDate(ticket.created_at)}</span>
+                  <span><strong>Created:</strong> {formatDateTime(ticket.created_at)}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Clock size={13} color="var(--text-muted)" />
-                  <span><strong>Updated:</strong> {ticket.updated_at ? formatDate(ticket.updated_at) : <span style={{ color: 'var(--text-muted)' }}>Not yet updated</span>}</span>
+                  <span><strong>Updated:</strong> {ticket.updated_at ? formatDateTime(ticket.updated_at) : <span style={{ color: 'var(--text-muted)' }}>Not yet updated</span>}</span>
                 </div>
                 <div>
                   <strong>Assigned To:</strong>{' '}
@@ -245,7 +225,7 @@ export default function TicketDetailModal({ isOpen, onClose, ticket, onUpdate })
                         }}
                       >
                         <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Support Team</span>
-                        <span>{formatDate(note.created_at)}</span>
+                        <span>{formatDateTime(note.created_at)}</span>
                       </div>
                       <p style={{ fontSize: '0.85rem', color: 'var(--text-primary)', whiteSpace: 'pre-wrap' }}>
                         {note.note_text}

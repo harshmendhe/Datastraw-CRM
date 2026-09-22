@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, Plus, ExternalLink, Inbox, Clock, Mail } from 'lucide-react';
+import { formatDate, formatTime } from '../utils/dateTime';
 
 export default function TicketsView({
   tickets,
@@ -39,35 +40,6 @@ export default function TicketsView({
     }
   };
 
-  const safeParseDate = (val) => {
-    if (!val) return null;
-    if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
-    const str = String(val).trim();
-    if (!str) return null;
-    const normalized = str.includes(' ') && !str.includes('T') ? str.replace(' ', 'T') : str;
-    const d = new Date(normalized);
-    return isNaN(d.getTime()) ? null : d;
-  };
-
-  const formatDate = (isoString) => {
-    const d = safeParseDate(isoString);
-    if (!d) return '';
-    return d.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
-  const formatTime = (isoString) => {
-    const d = safeParseDate(isoString);
-    if (!d) return '';
-    return d.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-  };
 
   return (
     <div className="tickets-view-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.35rem' }}>

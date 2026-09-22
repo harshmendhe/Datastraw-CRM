@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, User, Mail, Calendar, ExternalLink, Inbox } from 'lucide-react';
+import { formatDate } from '../utils/dateTime';
 
 export default function CustomerHistoryModal({
   isOpen,
@@ -39,15 +40,6 @@ export default function CustomerHistoryModal({
     }
   };
 
-  const formatDate = (isoString) => {
-    if (!isoString) return '—';
-    const d = new Date(isoString);
-    return d.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
