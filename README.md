@@ -1,19 +1,38 @@
 # Datastraw Support Ticket CRM
 
-A modern, high-performance Customer Support Ticket CRM built for support teams to triage, manage, and resolve customer issues with real-time status tracking, priority prioritization, and internal discussion notes.
+A full-stack Customer Support Ticket CRM for support teams to create, triage, and resolve customer issues — with status tracking, priority management, internal discussion notes, and a customer ticket history view.
+
+**Live App**: https://datastraw-crm-frontend-production.up.railway.app/
+**Backend API**: https://datastraw-crm-production-02d7.up.railway.app/
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Backend**: Python 3.12, FastAPI, SQLAlchemy ORM, Pydantic, Uvicorn
-- **Database**: SQLite (embedded, auto-created tables; demo seed data gated behind SEED_DEMO_DATA=true for local testing)
-- **Frontend**: React 19, Vite, Lucide Icons, Pure CSS Design System
-- **Deployment Ready**: Procfile, environment-aware API URL, Railway & Cloud ready
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend** | React 19, Vite, Lucide React, Vanilla CSS |
+| **Backend** | Python 3.12, FastAPI, Uvicorn |
+| **Data** | SQLAlchemy ORM, Pydantic v2, SQLite |
+| **Deployment** | Railway (backend + frontend), Procfile |
 
 ---
 
-## 📁 Project Structure
+## Key Features
+
+- **Sequential Ticket IDs**: Auto-generated `TKT-001`, `TKT-002`, ... with concurrency-safe locking.
+- **Status & Priority Management**: Open, In Progress, Closed × Low, Medium, High, Urgent.
+- **Internal Notes**: Append timestamped internal discussion notes when updating a ticket.
+- **Live Search**: Full-text search across ticket ID, customer name, email, subject, and description.
+- **Status Filter**: Filter the ticket list by status (All, Open, In Progress, Closed).
+- **Customer History Modal**: View all tickets submitted by a given customer in one click.
+- **Dashboard KPIs**: Live counts for total, open, in-progress, closed, and urgent tickets.
+- **UTC Timestamps**: Backend stores and returns timestamps with an explicit UTC offset (`+00:00`). The frontend displays them converted to Asia/Kolkata (IST).
+- **Security**: Strict production CORS, security headers (X-Frame-Options, CSP, HSTS), Swagger/docs disabled in production.
+
+---
+
+## Project Structure
 
 ```
 Datastraw CRM/
@@ -21,37 +40,37 @@ Datastraw CRM/
 ├── backend/
 │   ├── app/
 │   │   ├── __init__.py          # Package initializer
-│   │   ├── database.py          # SQLite connection and session management
+│   │   ├── database.py          # SQLite engine, session factory, Railway volume support
 │   │   ├── models.py            # Ticket and Note SQLAlchemy models
-│   │   ├── schemas.py           # Pydantic schemas (TicketCreate, TicketUpdate, etc.)
-│   │   ├── crud.py              # Sequential ticket ID generation (TKT-001, TKT-002, etc.), search, filter, notes logic
-│   │   └── main.py              # FastAPI endpoints & CORS
-│   ├── .env.example             # Backend environment template
-│   ├── Procfile                 # Railway / production deployment process
-│   ├── requirements.txt         # Backend Python dependencies
-│   ├── test_api.py              # Automated end-to-end API test suite
-│   ├── test_timestamp_handling.py # UTC/Asia:Kolkata timestamp tests
+│   │   ├── schemas.py           # Pydantic request/response schemas with UTC serialization
+│   │   ├── crud.py              # Ticket CRUD, sequential ID generation, search, notes
+│   │   └── main.py              # FastAPI app, CORS, security headers, endpoints
+│   ├── .env.example             # Backend environment variable template
+│   ├── Procfile                 # Railway start command
+│   ├── requirements.txt         # Python dependencies
+│   ├── test_api.py              # End-to-end API verification
+│   ├── test_timestamp_handling.py  # UTC → Asia/Kolkata timestamp tests
 │   └── .gitignore
 │
 ├── frontend/
 │   ├── public/
-│   │   └── favicon.svg          # Application favicon
+│   │   └── favicon.svg
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Navbar.jsx            # Support CRM branding & header
-│   │   │   ├── StatsSummary.jsx      # KPI summary (Total, Open, In Progress, Closed, Urgent)
-│   │   │   ├── TicketsView.jsx       # Real-time search, status filter & tickets table
-│   │   │   ├── CreateTicketModal.jsx # New ticket submission modal
-│   │   │   ├── TicketDetailModal.jsx # Ticket detail view, status/priority edit, discussion notes
-│   │   │   └── CustomerHistoryModal.jsx # Customer historical tickets modal
+│   │   │   ├── Navbar.jsx                # App header
+│   │   │   ├── StatsSummary.jsx          # KPI cards
+│   │   │   ├── TicketsView.jsx           # Search, filter, and tickets table
+│   │   │   ├── CreateTicketModal.jsx     # New ticket form
+│   │   │   ├── TicketDetailModal.jsx     # Ticket view, edit, and notes
+│   │   │   └── CustomerHistoryModal.jsx  # All tickets per customer
 │   │   ├── utils/
-│   │   │   ├── dateTime.js           # Shared UTC to Asia/Kolkata date/time formatting
-│   │   │   └── statusBadges.js       # Shared status & priority badge CSS helpers
-│   │   ├── api.js               # API client with VITE_API_BASE_URL support
-│   │   ├── App.jsx              # Main application orchestration & state
-│   │   ├── index.css            # Support desk design system
+│   │   │   ├── dateTime.js               # UTC → Asia/Kolkata formatting
+│   │   │   └── statusBadges.js           # Shared status/priority CSS class helpers
+│   │   ├── api.js               # Fetch-based API client (VITE_API_BASE_URL)
+│   │   ├── App.jsx              # Root component and application state
+│   │   ├── index.css            # Design system (CSS variables, components)
 │   │   └── main.jsx             # React entry point
-│   ├── .env.example             # Production API URL template
+│   ├── .env.example             # Frontend environment variable template
 │   ├── package.json
 │   ├── vite.config.js
 │   └── .gitignore
@@ -62,49 +81,29 @@ Datastraw CRM/
 
 ---
 
-## 🚀 Local Quickstart
+## Local Quickstart
 
-### 1. Backend (FastAPI + SQLite)
-
-Open a terminal in the project root:
+### 1. Backend
 
 ```bash
-# Navigate to backend
 cd backend
 
 # Activate virtual environment
 # Windows (PowerShell):
 .\venv\Scripts\Activate.ps1
-# Windows (CMD):
-.\venv\Scripts\activate.bat
-# macOS/Linux:
+# macOS / Linux:
 source venv/bin/activate
 
-# Install dependencies
 pip install -r requirements.txt
-
-# Start development server
 uvicorn app.main:app --reload --port 8000
 ```
 
-- **API Root**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-- **Interactive Swagger Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- **ReDoc**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+- **API Root**: http://127.0.0.1:8000
+- **Swagger Docs**: http://127.0.0.1:8000/docs *(development only — disabled in production)*
 
-*Note: On startup, the database automatically initializes tables in `crm.db`. Demo seed data is never seeded in production and requires `SEED_DEMO_DATA=true` in local development.*
+The database (`crm.db`) is created automatically on first startup. Demo seed data is **disabled by default** and **never runs in production**. To load sample tickets locally, set `SEED_DEMO_DATA=true` in your environment.
 
-### 2. Run Automated API Verification
-
-To verify that all backend endpoints, auto ID generation, notes appending, and search/filter work:
-
-```bash
-cd backend
-python test_api.py
-```
-
-### 3. Frontend (React + Vite)
-
-Open a second terminal:
+### 2. Frontend
 
 ```bash
 cd frontend
@@ -112,126 +111,167 @@ npm install
 npm run dev
 ```
 
-- **Support CRM Web Application**: [http://localhost:5173](http://localhost:5173)
+- **CRM UI**: http://localhost:5173
+
+Copy `frontend/.env.example` to `frontend/.env.local` and set `VITE_API_BASE_URL` if the backend is running on a different port or host.
 
 ---
 
-## 🔌 API Endpoints Specification
+## API Reference
 
-### 1. `GET /api/stats` (Optional / KPI)
-Returns summary counts for dashboard metrics.
-**Response**:
+### `GET /api/stats`
+Returns live ticket counts for the dashboard.
+
 ```json
 {
-  "total_tickets": 5,
-  "open_tickets": 2,
-  "in_progress_tickets": 2,
-  "closed_tickets": 1,
-  "urgent_tickets": 1
+  "total_tickets": 10,
+  "open_tickets": 4,
+  "in_progress_tickets": 3,
+  "closed_tickets": 3,
+  "urgent_tickets": 2
 }
 ```
 
-### 2. `GET /api/tickets`
-List tickets with optional query parameters.
-- `?status=Open` (Filter: `All`, `Open`, `In Progress`, `Closed`)
-- `?search=query` (Live search across Ticket ID, customer name, email, subject, description)
+---
 
-### 3. `POST /api/tickets`
-Creates a ticket with auto-generated sequential ID (`TKT-001`, `TKT-002`, ...).
-**Request Body**:
+### `GET /api/tickets`
+List tickets with optional filters.
+
+| Parameter | Description |
+| :--- | :--- |
+| `?status=Open` | Filter by status: `All`, `Open`, `In Progress`, `Closed` |
+| `?search=query` | Full-text search across ticket ID, name, email, subject, description |
+| `?customer_email=alice@example.com` | Return all tickets for a specific customer |
+
+---
+
+### `POST /api/tickets`
+Create a new ticket. A sequential `ticket_id` is assigned automatically.
+
 ```json
 {
   "customer_name": "Alice Rivera",
   "customer_email": "alice@example.com",
-  "subject": "Webhook failing with 401",
-  "description": "Payloads are failing authentication after credential rotation.",
+  "subject": "Webhook failing with 401 Unauthorized",
+  "description": "Payloads are failing after credential rotation.",
   "priority": "Urgent"
 }
 ```
 
-### 4. `GET /api/tickets/{ticket_id}`
-Retrieve a specific ticket and its complete notes thread by ticket identifier (e.g., `/api/tickets/TKT-001`).
-**Response**:
+---
+
+### `GET /api/tickets/{ticket_id}`
+Retrieve a ticket and its full notes thread (e.g. `/api/tickets/TKT-001`).
+
 ```json
 {
   "id": 1,
   "ticket_id": "TKT-001",
   "customer_name": "Alice Rivera",
   "customer_email": "alice@example.com",
-  "subject": "Webhook failing with 401",
-  "description": "Payloads are failing...",
+  "subject": "Webhook failing with 401 Unauthorized",
+  "description": "Payloads are failing after credential rotation.",
   "status": "In Progress",
   "priority": "Urgent",
-  "created_at": "2026-09-18T14:30:00Z",
-  "updated_at": "2026-09-18T14:35:00Z",
+  "assigned_to": "Technical Support",
+  "created_at": "2026-09-22T10:30:00+00:00",
+  "updated_at": "2026-09-22T11:15:00+00:00",
   "notes": [
     {
       "id": 1,
       "ticket_id": "TKT-001",
-      "note_text": "Customer updated OAuth secrets.",
-      "created_at": "2026-09-18T14:35:00Z"
+      "note_text": "Customer regenerated client secret but did not update webhook header.",
+      "created_at": "2026-09-22T11:15:00+00:00"
     }
   ]
 }
 ```
 
-### 5. `PUT /api/tickets/{ticket_id}`
-Updates ticket status, priority, and optionally appends an internal note via the `notes` field.
-**Request Body**:
+---
+
+### `PUT /api/tickets/{ticket_id}`
+Update ticket status, priority, or assigned team. Optionally append an internal note.
+
 ```json
 {
   "status": "In Progress",
   "priority": "High",
-  "notes": "Assigned engineer to investigate log traces."
+  "assigned_to": "Technical Support",
+  "notes": "Reproduced issue in staging. Fix deployed."
 }
 ```
 
 ---
 
-## 🌐 Deployment Verification Guide
+## Testing
 
-### Phase 1: Deploy FastAPI Backend to Railway
+### End-to-End API Test
 
-1. **Create Railway Project**:
-   - Log in to [Railway.app](https://railway.app).
-   - Click **New Project** → **Deploy from GitHub repo** (or use Railway CLI `railway init`).
-   - Select the `backend` folder as the Root Directory (or deploy from repository root with Root Directory set to `backend`).
+Verifies stats, ticket creation, update, search, and customer history filter:
 
-2. **Configure Environment & Start Command**:
-   - The repository includes [`backend/Procfile`](file:///c:/Users/asus/Downloads/Datastraw%20CRM/backend/Procfile):
-     ```
-     web: uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
-     ```
-   - Railway will automatically detect Python and install packages from `requirements.txt`.
-   - In Railway **Settings** → **Networking**, click **Generate Domain** (e.g. `https://datastraw-backend-production.up.railway.app`).
+```bash
+cd backend
+python test_api.py
+```
 
-3. **Verify Public API URL**:
-   - Open `https://<your-railway-domain>/docs` in your browser.
-   - Verify that Swagger UI loads and `/api/tickets` returns `HTTP 200`.
+### Timestamp Tests
 
----
+Verifies UTC backend timestamps correctly convert to Asia/Kolkata in both unit and live API scenarios:
 
-### Phase 2: Deploy Frontend & Configure API URL
+```bash
+cd backend
+python test_timestamp_handling.py
+```
 
-1. **Configure API Base URL**:
-   - The frontend API client in [`frontend/src/api.js`](file:///c:/Users/asus/Downloads/Datastraw%20CRM/frontend/src/api.js) automatically reads `import.meta.env.VITE_API_BASE_URL`.
-   - Set this environment variable in your frontend hosting provider (Vercel, Netlify, or Railway):
-     ```env
-     VITE_API_BASE_URL=https://<your-railway-domain>/api
-     ```
+### Frontend Lint & Build
 
-2. **Deploy to Vercel / Netlify**:
-   - **Root Directory**: `frontend`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-   - **Environment Variable**: `VITE_API_BASE_URL = https://<your-railway-domain>/api`
+```bash
+cd frontend
+npm run lint
+npm run build
+```
 
 ---
 
-### Phase 3: End-to-End Verification on Deployed App
+## Deployment
 
-- [x] **Dashboard KPI**: Verify total, open, in progress, closed, and urgent ticket counts display accurately.
-- [x] **Create Ticket**: Submit a new ticket through the modal; confirm it receives a formatted `TKT-xxx` identifier.
-- [x] **Live Search**: Type into the search bar and verify instantaneous filtering across ticket ID, customer name, email, and subject.
-- [x] **Status Filter**: Toggle between `All`, `Open`, `In Progress`, and `Closed` to confirm filtering.
-- [x] **Detail & Notes**: Click a ticket row, change its status/priority, write an internal note, and click **Update Ticket**. Confirm the note is appended to the discussion thread and the status updates across the UI.
+The application is deployed on [Railway](https://railway.app) with two services:
+
+| Service | URL |
+| :--- | :--- |
+| **Frontend** | https://datastraw-crm-frontend-production.up.railway.app/ |
+| **Backend API** | https://datastraw-crm-production-02d7.up.railway.app/ |
+
+**Backend** is deployed from the `backend/` root directory using the `Procfile`:
+```
+web: uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+```
+
+**Required Railway environment variables** (backend):
+
+| Variable | Description |
+| :--- | :--- |
+| `DATABASE_URL` | `sqlite:////data/crm.db` (Railway persistent volume) |
+| `ENVIRONMENT` | `production` |
+| `FRONTEND_URL` | Frontend Railway domain (for CORS) |
+
+**Frontend** is deployed from the `frontend/` root directory:
+- Build command: `npm run build`
+- Start command: `npm run start` (`serve --single --listen $PORT dist`)
+- Environment variable: `VITE_API_BASE_URL=https://datastraw-crm-production-02d7.up.railway.app/api`
+
+> **Note**: Swagger UI (`/docs`) and OpenAPI (`/openapi.json`) are disabled when `ENVIRONMENT=production`.
+
+---
+
+## AI-Assisted Development
+
+This project was built with AI pair programming assistance for:
+
+- FastAPI backend structure, CRUD logic, and schema design
+- UTC-aware timestamp handling and Asia/Kolkata display conversion
+- CORS configuration, security headers, and production hardening
+- React component architecture and state management
+- Railway deployment configuration and SQLite volume persistence
+- Automated test suites for API endpoints and timestamp correctness
+- Code cleanup: unused file removal, deduplication of utility logic, lint fixes

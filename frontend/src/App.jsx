@@ -107,7 +107,7 @@ export default function App() {
     if (selectedCustomer && selectedCustomer.email) {
       fetchCustomerTickets(selectedCustomer.email)
         .then((t) => setCustomerTickets(t))
-        .catch(() => {});
+        .catch(() => { });
     }
     return updated;
   };
