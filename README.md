@@ -283,8 +283,6 @@ web: uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
 
 ## AI-Assisted Development
 
-## AI-Assisted Development
-
 AI tools were used as supporting tools throughout development for brainstorming, debugging, documentation, and exploring implementation approaches. I reviewed, adapted, tested, and integrated the resulting code and was responsible for the final application decisions and implementation.
 
 AI assistance was used for areas such as:
