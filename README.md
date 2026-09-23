@@ -283,12 +283,15 @@ web: uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
 
 ## AI-Assisted Development
 
-This project was built with AI pair programming assistance for:
+## AI-Assisted Development
 
-- FastAPI backend structure, CRUD logic, and schema design
-- UTC-aware timestamp handling and Asia/Kolkata display conversion
-- CORS configuration, security headers, and production hardening
-- React component architecture and state management
-- Railway deployment configuration and SQLite volume persistence
-- Automated test suites for API endpoints and timestamp correctness
-- Code cleanup: unused file removal, deduplication of utility logic, lint fixes
+AI tools were used as supporting tools throughout development for brainstorming, debugging, documentation, and exploring implementation approaches. I reviewed, adapted, tested, and integrated the resulting code and was responsible for the final application decisions and implementation.
+
+AI assistance was used for areas such as:
+
+- Exploring CRUD patterns
+- Debugging and refining UTC timestamp handling and Asia/Kolkata display
+- Exploring React component structure and UI improvements
+- Troubleshooting SQLite persistence
+- Assisting with test cases and debugging failing scenarios
+- Reviewing and simplifying code during final cleanup
