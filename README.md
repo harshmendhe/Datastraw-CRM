@@ -20,6 +20,9 @@ FastAPI Backend
 SQLite Database
   ↓
 Railway Persistent Volume
+```
+
+---
 
 ## Tech Stack
 
