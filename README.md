@@ -8,6 +8,19 @@ The application is deployed as two Railway services: a React frontend and a Fast
 
 ---
 
+## Architecture
+
+```text
+User
+  ↓
+React + Vite Frontend
+  ↓ REST API
+FastAPI Backend
+  ↓ SQLAlchemy ORM
+SQLite Database
+  ↓
+Railway Persistent Volume
+
 ## Tech Stack
 
 | Layer | Technologies |
