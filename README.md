@@ -1,6 +1,7 @@
 # Datastraw Support Ticket CRM
 
 A full-stack Customer Support Ticket CRM for support teams to create, triage, and resolve customer issues — with status tracking, priority management, internal discussion notes, and a customer ticket history view.
+The application is deployed as two Railway services: a React frontend and a FastAPI backend with persistent SQLite storage.
 
 **Live App**: https://datastraw-crm-frontend-production.up.railway.app/
 **Backend API**: https://datastraw-crm-production-02d7.up.railway.app/
